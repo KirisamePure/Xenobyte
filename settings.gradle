@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = "GTNH"
+            url = "https://nexus.gtnewhorizons.com/repository/public/"
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    // Downloads a Java 8 JDK automatically if none is installed
+    id "org.gradle.toolchains.foojay-resolver-convention" version "0.9.0"
+}
+
+rootProject.name = "xenobyte"

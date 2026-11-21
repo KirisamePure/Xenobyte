@@ -6,6 +6,16 @@
 
   - https://youtu.be/nZAEb3mmXL4
   
+# Building (сборка)
+
+Uses [RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) (Gradle 8.14.3, wrapper included).
+
+  - Requires JDK 17+ to run Gradle (для запуска Gradle нужен JDK 17+). The mod itself is compiled with Java 8, which Gradle downloads automatically if it is not installed (Java 8 для компиляции скачивается автоматически).
+  - IntelliJ IDEA: `File → Open` → select the project folder → trust the Gradle project. In `Settings → Build Tools → Gradle` set **Gradle JVM** to JDK 17 or newer. The first sync downloads and decompiles Minecraft (takes several minutes).
+  - `gradlew build` → `build/libs/xenobyte-1.0.0.jar` (ProGuard-obfuscated + reobfuscated, ready to use) and `mainclass.txt`
+  - `gradlew runClient` → development client in `run/`
+  - `gradlew runObfClient` → test the final jar in a normal (obfuscated) Forge client
+
 # Possible causes of crashes
 
   - Using an injector that does not match the operating system or java bitness (использование инжекта не соответствующей с операционной системой или java разрядности)

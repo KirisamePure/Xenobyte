@@ -1,44 +1,53 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "https://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        flatDir dirs: "$projectDir/proguard/lib/"
-    }
-    dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT"        
-        classpath ":proguard:"
+// Minecraft 1.7.10 / Forge 10.13.4.1614 build using RetroFuturaGradle
+// (https://github.com/GTNewHorizons/RetroFuturaGradle), the maintained
+// replacement for ForgeGradle 1.2, whose download URLs no longer exist.
+//
+// Gradle itself needs Java 17+; the mod is compiled with a Java 8 toolchain
+// (auto-downloaded if missing).
+//
+//   gradlew build      -> build/libs/xenobyte-1.0.0.jar (ProGuard + reobf), mainclass.txt
+//   gradlew runClient  -> dev client in ./run
+
+plugins {
+    id "java"
+    id "idea"
+    id "com.gtnewhorizons.retrofuturagradle" version "1.4.9"
+}
+
+version = "1.0.0"
+group = "forgefuck.team.xenobyte"
+base.archivesName = "xenobyte"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
     }
 }
 
-apply plugin: "forge"
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
-[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
-
-version = "1.0.0"
-group = "forgefuck.team.xenobyte" 
-archivesBaseName = "xenobyte"
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
 
 minecraft {
-    version = "1.7.10-10.13.4.1614-1.7.10"
-    runDir = "minecraft-debug"
+    mcVersion = "1.7.10"
+    username = "Developer"
+}
+
+repositories {
+    maven {
+        name = "GTNH"
+        url = "https://nexus.gtnewhorizons.com/repository/public/"
+    }
+    maven {
+        name = "Mojang"
+        url = "https://libraries.minecraft.net/"
+    }
+    mavenCentral()
 }
 
 configurations {
     bundle
-    compile.extendsFrom bundle
-}
-
-repositories {
-    jcenter()
+    implementation.extendsFrom bundle
 }
 
 dependencies {
@@ -47,94 +56,108 @@ dependencies {
 
 jar {
     from {
-        configurations.bundle.collect { it.isDirectory() ? it : zipTree(it); }
+        configurations.bundle.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include "mcmod.info"
-                
-        expand "version" : project.version, "mcversion" : project.minecraft.version
-    }
-        
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "mcmod.info"
+    inputs.property "mcversion", minecraft.mcVersion
+    filesMatching("mcmod.info") {
+        expand "version": project.version, "mcversion": minecraft.mcVersion.get()
     }
 }
 
-def generateString(String alphabet, int n) {
-    return new Random().with {
-        (1..n).collect { alphabet[nextInt(alphabet.length())] }.join()
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
 
-def generateDictionaryFile(String name) {
-    File dictionaryFile = new File(name)
-    if (dictionaryFile.exists())
-        return;
-    String outputData = ""
-    for (int i = 0; i < 10000; i++)
-        outputData += generateString((('a'..'z') + ('A'..'Z') + ('0'..'9')).join(), 16) + "\n"
-    dictionaryFile.getParentFile().mkdirs()
-    dictionaryFile.delete()
-    dictionaryFile.write outputData
+// ---------------------------------------------------------------------------
+// ProGuard obfuscation of the mod's own classes: dev jar -> ProGuard -> reobf
+// ---------------------------------------------------------------------------
+
+def proguardDir = layout.buildDirectory.dir("proguard")
+def devJar = tasks.named("jar", Jar).flatMap { it.archiveFile }
+def proguardedJar = proguardDir.map { it.file("xenobyte-proguarded.jar") }
+def proguardMap = layout.buildDirectory.file("libs/proguard-xenobyte-${version}.jar.map")
+def java8Launcher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(8) }
+
+def randomWords = { int count ->
+    def alphabet = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
+    def rnd = new Random()
+    (1..count).collect { (1..16).collect { alphabet[rnd.nextInt(alphabet.length())] }.join() }.join("\n") + "\n"
 }
 
-task generateDictionary {
-    doFirst {
-        generateDictionaryFile("$buildDir/proguard/class-dictionary.txt")
-        generateDictionaryFile("$buildDir/proguard/package-dictionary.txt")
-        generateDictionaryFile("$buildDir/proguard/fieldmethod-dictionary.txt")
-    }
-}
-
-task obfuscateProGuard(type: proguard.gradle.ProGuardTask) {
-    doFirst {
-        injars "$buildDir/libs/" + project.tasks["jar"].archiveName
-        outjars "$buildDir/libs/final-" + project.tasks["jar"].archiveName
-        libraryjars "${System.getProperty("java.home")}/lib/rt.jar"
-        libraryjars "${System.getProperty("java.home")}/lib/jce.jar"
-        libraryjars sourceSets.main.compileClasspath
-        keepattributes "RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeVisibleTypeAnnotations"
-        keep "class !forgefuck.team.xenobyte.** { *; }"
-        classobfuscationdictionary "$buildDir/proguard/class-dictionary.txt"
-        packageobfuscationdictionary "$buildDir/proguard/package-dictionary.txt"
-        obfuscationdictionary "$buildDir/proguard/fieldmethod-dictionary.txt"
-        dontshrink
-        dontoptimize
-        printmapping "$buildDir/libs/proguard-" + project.tasks["jar"].archiveName + ".map"
-    }
-}
-
-task createJavaInjectorComment {
-    doFirst {
-        File mainClassFile = new File("$projectDir/mainclass.txt")
-        if (mainClassFile.exists())
-            mainClassFile.delete()
-        String mappingsText = new File("$buildDir/libs/proguard-" + project.tasks["jar"].archiveName + ".map").text
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile("forgefuck\\.team\\.xenobyte\\.api\\.integration\\.JavaInjector -> (.*?):")
-        java.util.regex.Matcher m = p.matcher(mappingsText)
-        m.find();
-        new File("$projectDir/mainclass.txt").write m.group(1);
-    }
-}
-
-task copyJar {
-    doFirst {
-        copy {
-            from "$buildDir/libs"
-            include "final-" + project.tasks["jar"].archiveName
-            into "$buildDir/libs"
-            rename "final-" + project.tasks["jar"].archiveName, project.tasks["jar"].archiveName
+def generateDictionary = tasks.register("generateDictionary") {
+    def dir = proguardDir.get().asFile
+    outputs.files(new File(dir, "class-dictionary.txt"), new File(dir, "package-dictionary.txt"), new File(dir, "fieldmethod-dictionary.txt"))
+    doLast {
+        dir.mkdirs()
+        ["class", "package", "fieldmethod"].each {
+            def f = new File(dir, "${it}-dictionary.txt")
+            if (!f.exists()) {
+                f.text = randomWords(10000)
+            }
         }
     }
 }
 
-obfuscateProGuard.dependsOn generateDictionary
-createJavaInjectorComment.dependsOn obfuscateProGuard
-copyJar.dependsOn createJavaInjectorComment
-reobf.dependsOn copyJar
+def obfuscateProGuard = tasks.register("obfuscateProGuard", JavaExec) {
+    dependsOn generateDictionary
+    def libraries = sourceSets.main.compileClasspath
+    inputs.file(devJar)
+    inputs.files(libraries)
+    outputs.file(proguardedJar)
+    outputs.file(proguardMap)
+    javaLauncher = java8Launcher
+    classpath = files("proguard/lib/proguard.jar")
+    mainClass = "proguard.ProGuard"
+    def config = proguardDir.map { it.file("proguard.pro") }
+    args "@" + config.get().asFile.absolutePath
+    doFirst {
+        def dir = proguardDir.get().asFile
+        def javaHome = java8Launcher.get().metadata.installationPath.asFile
+        def q = { File f -> "'" + f.absolutePath + "'" }
+        def lines = []
+        lines << "-injars " + q(devJar.get().asFile)
+        lines << "-outjars " + q(proguardedJar.get().asFile)
+        ["lib/rt.jar", "jre/lib/rt.jar", "lib/jce.jar", "jre/lib/jce.jar"].each {
+            def f = new File(javaHome, it)
+            if (f.exists()) lines << "-libraryjars " + q(f)
+        }
+        libraries.files.findAll { it.exists() }.each { lines << "-libraryjars " + q(it) }
+        lines << "-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeVisibleTypeAnnotations"
+        lines << "-keep class !forgefuck.team.xenobyte.** { *; }"
+        lines << "-classobfuscationdictionary " + q(new File(dir, "class-dictionary.txt"))
+        lines << "-packageobfuscationdictionary " + q(new File(dir, "package-dictionary.txt"))
+        lines << "-obfuscationdictionary " + q(new File(dir, "fieldmethod-dictionary.txt"))
+        lines << "-dontshrink"
+        lines << "-dontoptimize"
+        lines << "-dontwarn"
+        lines << "-ignorewarnings"
+        lines << "-printmapping " + q(proguardMap.get().asFile)
+        config.get().asFile.text = lines.join("\n") + "\n"
+    }
+}
+
+def createJavaInjectorComment = tasks.register("createJavaInjectorComment") {
+    dependsOn obfuscateProGuard
+    inputs.file(proguardMap)
+    def out = file("mainclass.txt")
+    outputs.file(out)
+    doLast {
+        def m = proguardMap.get().asFile.text =~ /forgefuck\.team\.xenobyte\.api\.integration\.JavaInjector -> (.*?):/
+        if (!m.find()) {
+            throw new GradleException("JavaInjector not found in ProGuard mapping")
+        }
+        out.text = m.group(1)
+    }
+}
+
+tasks.named("reobfJar") {
+    dependsOn createJavaInjectorComment
+    inputJar.set(proguardedJar)
+}

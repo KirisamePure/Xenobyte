@@ -9,3 +9,9 @@ loader/eloader/output/
 loader/eloader/temp/
 loader/eloader/eloader/classes.h
 mainclass.txt
+# RetroFuturaGradle
+run/
+.gradle/
+.idea/
+*.iml
+out/
