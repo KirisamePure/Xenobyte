@@ -29,8 +29,15 @@ public class GiveSelect extends CheatModule {
     public GiveSelect() {
         super("GiveSelect", Category.NEI, PerformMode.SINGLE);
         givedItem = new ItemStack(Blocks.command_block);
-        chanter = new ItemChanter();
         count = 1;
+    }
+    
+    /** Created on first use: building a Swing window at load time fails where AWT is headless (e.g. lwjgl3ify on macOS). */
+    private ItemChanter chanter() {
+        if (chanter == null) {
+            chanter = new ItemChanter();
+        }
+        return chanter;
     }
     
     public ItemStack givedItem() {
@@ -40,7 +47,7 @@ public class GiveSelect extends CheatModule {
     }
     
     public NBTTagCompound givedNBT() {
-        return chanter.getOutNBT();
+        return chanter == null ? new NBTTagCompound() : chanter.getOutNBT();
     }
     
     public int itemCount() {
@@ -57,7 +64,7 @@ public class GiveSelect extends CheatModule {
             if (checkItem != null) {
                 widgetMessage(lang.get("selected ", "выбран ") + (givedItem = checkItem).getDisplayName() + " [x" + count + "]", WidgetMode.INFO);
             } else if (utils.isInGameGui()) {
-                if (chanter.isCheckMode()) {
+                if (chanter().isCheckMode()) {
                     NBTTagCompound outTag = new NBTTagCompound();
                     String outMessage = new String();
                     TileEntity tile = Xeno.utils.tile();
@@ -77,10 +84,10 @@ public class GiveSelect extends CheatModule {
                     }
                     if (!outTag.hasNoTags()) {
                         widgetMessage(outMessage, WidgetMode.INFO);
-                        chanter.loadCustomNBT(outTag);
+                        chanter().loadCustomNBT(outTag);
                     }
                 }
-                chanter.showFrame();
+                chanter().showFrame();
             }
         } else {
             widgetMessage(lang.get("to select an item, you need to hover over it and press the keybind", "для выбора предмета необходимо навести на него и нажать кейбинд"), WidgetMode.FAIL);
@@ -131,7 +138,7 @@ public class GiveSelect extends CheatModule {
             },
             new Button("Chanter") {
                 @Override public void onLeftClick() {
-                    chanter.showFrame();
+                    chanter().showFrame();
                 }
                 @Override public String elementDesc() {
                     return lang.get("NBT editor (will open by GiveSelect keybind)", "Редактор NBT (открывается по кейбинду GiveSelect)");

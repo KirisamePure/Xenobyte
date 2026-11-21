@@ -52,6 +52,11 @@ configurations {
 
 dependencies {
     bundle fileTree(dir: "libs", includes: ["*.jar"])
+
+    // Optional integrations, compile-time only (versions shipped in GTNH 2.9.0).
+    // Used by VeinScan; the module is disabled when these mods are not installed.
+    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.54.265:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:VisualProspecting:1.5.42:dev") { transitive = false }
 }
 
 jar {
@@ -128,7 +133,8 @@ def obfuscateProGuard = tasks.register("obfuscateProGuard", JavaExec) {
             def f = new File(javaHome, it)
             if (f.exists()) lines << "-libraryjars " + q(f)
         }
-        libraries.files.findAll { it.exists() }.each { lines << "-libraryjars " + q(it) }
+        // Skip multi-release class versions (e.g. META-INF/versions/17 in GT5u), which this ProGuard can't read
+        libraries.files.findAll { it.exists() }.each { lines << "-libraryjars " + q(it) + "(!META-INF/versions/**)" }
         lines << "-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeVisibleTypeAnnotations"
         lines << "-keep class !forgefuck.team.xenobyte.** { *; }"
         lines << "-classobfuscationdictionary " + q(new File(dir, "class-dictionary.txt"))

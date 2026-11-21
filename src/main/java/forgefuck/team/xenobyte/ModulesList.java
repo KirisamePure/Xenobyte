@@ -87,6 +87,7 @@ import forgefuck.team.xenobyte.modules.TravellersGive;
 import forgefuck.team.xenobyte.modules.TurretNuker;
 import forgefuck.team.xenobyte.modules.VanilaNuker;
 import forgefuck.team.xenobyte.modules.VanillaMagic;
+import forgefuck.team.xenobyte.modules.VeinScan;
 import forgefuck.team.xenobyte.modules.WallHack;
 import forgefuck.team.xenobyte.modules.WayLine;
 import forgefuck.team.xenobyte.modules.Widgets;
@@ -126,6 +127,7 @@ public class ModulesList extends ArrayList<CheatModule>  {
         add(new OpenCreative());
         add(new CreativeGive());
         add(new VanillaMagic());
+        add(new VeinScan());
         add(new TinkerNoFall());
         add(new CarpenterUse());
         add(new CrayfishGive());
