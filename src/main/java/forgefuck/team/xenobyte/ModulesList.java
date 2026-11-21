@@ -41,6 +41,7 @@ import forgefuck.team.xenobyte.modules.FakeItem;
 import forgefuck.team.xenobyte.modules.FastBreak;
 import forgefuck.team.xenobyte.modules.FastPlace;
 import forgefuck.team.xenobyte.modules.FluidWalk;
+import forgefuck.team.xenobyte.modules.FreeCam;
 import forgefuck.team.xenobyte.modules.FullBright;
 import forgefuck.team.xenobyte.modules.GalacticFire;
 import forgefuck.team.xenobyte.modules.GiveSelect;
@@ -171,6 +172,7 @@ public class ModulesList extends ArrayList<CheatModule>  {
         add(new BunnyHop());
         add(new WallHack());
         add(new BlinkCam());
+        add(new FreeCam());
         add(new AutoDrop());
         add(new Credits());
         add(new Ceiling());
