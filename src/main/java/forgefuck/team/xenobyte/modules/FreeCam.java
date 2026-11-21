@@ -106,7 +106,7 @@ public class FreeCam extends CheatModule {
             fake.rotationYawHead = oYaw;
         }
         EntityClientPlayerMP pl = utils.player();
-        pl.noClip = noclip;
+        pl.noClip = fly && noclip;
         pl.fallDistance = 0;
         if (fly) {
             GameSettings gs = utils.mc().gameSettings;
@@ -167,7 +167,7 @@ public class FreeCam extends CheatModule {
                     buttonValue(noclip = !noclip);
                 }
                 @Override public String elementDesc() {
-                    return lang.get("Camera passes through walls", "Камера проходит сквозь стены");
+                    return lang.get("Camera passes through walls (only with Fly)", "Камера проходит сквозь стены (только с Fly)");
                 }
             }
         );
