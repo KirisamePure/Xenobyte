@@ -23,7 +23,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import forgefuck.team.xenobyte.api.Xeno;
 import forgefuck.team.xenobyte.modules.GiveSelect;
-import forgefuck.team.xenobyte.modules.XRaySelect;
+import forgefuck.team.xenobyte.modules.BlockESPSelect;
 import gnu.trove.map.hash.TByteObjectHashMap;
 import gnu.trove.map.hash.TObjectByteHashMap;
 import io.netty.buffer.ByteBuf;
@@ -601,7 +601,7 @@ public class Utils {
         return root;
     }
     
-    public List<int[]> nukerList(int[] c, int r, XRaySelect selector) {
+    public List<int[]> nukerList(int[] c, int r, BlockESPSelect selector) {
         r --;
         List<int[]> list = new ArrayList<int[]>();
         for (int i = r; i >= -r; i--) {

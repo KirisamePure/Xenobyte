@@ -33,6 +33,12 @@ minecraft {
     username = "Developer"
 }
 
+// Load the XRay coremod in development runs; the release jar declares it in its manifest instead
+// (runObfClient must not get this flag: it would make the class lookup fail before the mods-folder jar is scanned).
+tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEach {
+    jvmArgs("-Dfml.coreMods.load=forgefuck.team.xenobyte.coremod.asm.XenoCoreMod")
+}
+
 repositories {
     maven {
         name = "GTNH"
@@ -62,6 +68,10 @@ dependencies {
 jar {
     from {
         configurations.bundle.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        // Coremod for the transparent XRay; the jar also stays a normal @Mod
+        attributes("FMLCorePlugin": "forgefuck.team.xenobyte.coremod.asm.XenoCoreMod", "FMLCorePluginContainsFMLMod": "true")
     }
 }
 
@@ -137,6 +147,8 @@ def obfuscateProGuard = tasks.register("obfuscateProGuard", JavaExec) {
         libraries.files.findAll { it.exists() }.each { lines << "-libraryjars " + q(it) + "(!META-INF/versions/**)" }
         lines << "-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeVisibleTypeAnnotations"
         lines << "-keep class !forgefuck.team.xenobyte.** { *; }"
+        // Coremod: loaded by name from the manifest, and patched Minecraft code calls XRayHook by name
+        lines << "-keep class forgefuck.team.xenobyte.coremod.** { *; }"
         lines << "-classobfuscationdictionary " + q(new File(dir, "class-dictionary.txt"))
         lines << "-packageobfuscationdictionary " + q(new File(dir, "package-dictionary.txt"))
         lines << "-obfuscationdictionary " + q(new File(dir, "fieldmethod-dictionary.txt"))

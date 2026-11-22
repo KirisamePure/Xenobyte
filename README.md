@@ -16,6 +16,11 @@ Uses [RetroFuturaGradle](https://github.com/GTNewHorizons/RetroFuturaGradle) (Gr
   - `gradlew runClient` → development client in `run/`
   - `gradlew runObfClient` → test the final jar in a normal (obfuscated) Forge client
 
+# XRay / BlockESP
+
+  - **BlockESP** (formerly XRay): highlights the blocks selected with BlockESPSelect (formerly XRaySelect). Keybinds and settings of the old XRay/XRaySelect are kept.
+  - **XRay**: hides stone, dirt and other terrain so ores, fluids, spawners etc. show through (like LiquidBounce). It patches the block renderer, so it only works when Xenobyte is installed in the `mods` folder (coremod), not when injected (XRay is newly added; BlockESP works either way).
+
 # Possible causes of crashes
 
   - Using an injector that does not match the operating system or java bitness (использование инжекта не соответствующей с операционной системой или java разрядности)

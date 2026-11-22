@@ -10,7 +10,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 public class BobbingControl extends CheatModule {
     
     private PortalHelper phelper;
-    private XRay xray;
+    private BlockESP xray;
     private Esp esp;
 
     public BobbingControl() {
@@ -23,7 +23,7 @@ public class BobbingControl extends CheatModule {
     
     @Override public void onPostInit() {
         phelper = (PortalHelper) moduleHandler().getModuleByClass(PortalHelper.class);
-        xray = (XRay) moduleHandler().getModuleByClass(XRay.class);
+        xray = (BlockESP) moduleHandler().getModuleByClass(BlockESP.class);
         esp = (Esp) moduleHandler().getModuleByClass(Esp.class);
     }
     

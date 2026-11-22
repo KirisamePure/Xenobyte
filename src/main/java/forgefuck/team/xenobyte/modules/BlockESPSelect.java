@@ -23,7 +23,7 @@ import forgefuck.team.xenobyte.gui.click.elements.Button;
 import forgefuck.team.xenobyte.gui.click.elements.Panel;
 import forgefuck.team.xenobyte.gui.swing.ColorPickerGui;
 import forgefuck.team.xenobyte.render.Colors;
-import forgefuck.team.xenobyte.render.XRayHintRender;
+import forgefuck.team.xenobyte.render.BlockESPHintRender;
 import forgefuck.team.xenobyte.utils.Config;
 import forgefuck.team.xenobyte.utils.Reflections;
 import net.minecraft.block.Block;
@@ -34,7 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
 
-public class XRaySelect extends CheatModule {
+public class BlockESPSelect extends CheatModule {
     
     @Cfg("configBlocks") private List<String> configBlocks;
     @Cfg("guiHint") public boolean guiHint;
@@ -42,12 +42,12 @@ public class XRaySelect extends CheatModule {
     public List<SelectedBlock> blocks;
     private String neiSubset;
     
-    public XRaySelect() {
-        super("XRaySelect", Category.NEI, PerformMode.SINGLE);
+    public BlockESPSelect() {
+        super("BlockESPSelect", Category.NEI, PerformMode.SINGLE);
         blocks = new CopyOnWriteArrayList<SelectedBlock>();
         missingBlocks = new ArrayList<String>();
         configBlocks = new ArrayList<String>();
-        neiSubset = "X-Ray";
+        neiSubset = "BlockESP";
         guiHint = true;
     }
     
@@ -71,7 +71,7 @@ public class XRaySelect extends CheatModule {
         IdentityHashMap<Item, IItemRenderer> customRender = Reflections.getPrivateValue(MinecraftForgeClient.class, null, 0);
         for (Object obj : Item.itemRegistry) {
             if (obj instanceof ItemBlock && !customRender.containsKey(obj)) {
-                MinecraftForgeClient.registerItemRenderer((Item) obj, new XRayHintRender(this));
+                MinecraftForgeClient.registerItemRenderer((Item) obj, new BlockESPHintRender(this));
             }
         }
         for (String cBlock : configBlocks) {
@@ -100,7 +100,7 @@ public class XRaySelect extends CheatModule {
             ItemStack stack = utils.isInGameGui() ? utils.getStackFromView() : NEI.getStackMouseOver();
             if (stack != null && stack.getItem() instanceof ItemBlock) {
                 SelectedBlock block = getBlock(stack);
-                new XRaySettings(block == null ? new SelectedBlock(stack, Colors.BLACK, 1, false, false) : block).showFrame();
+                new BlockESPSettings(block == null ? new SelectedBlock(stack, Colors.BLACK, 1, false, false) : block).showFrame();
             }
         }
     }
@@ -117,8 +117,13 @@ public class XRaySelect extends CheatModule {
         return false;
     }
     
+    /** Formerly "XRaySelect": keeps the selected blocks and keybind from the old config entry. */
+    @Override public String configId() {
+        return "XRaySelect";
+    }
+    
     @Override public String moduleDesc() {
-        return lang.get("Selecting by keybind a block for X-Ray in NEI, or by looking at block. Adds NEI @X-Ray tab", "Выбор по кейбинду блока для X-Ray в NEI, или по взгляду на блок. Добавляет вкладку @X-Ray");
+        return lang.get("Selecting by keybind a block for BlockESP in NEI, or by looking at block. Adds NEI @BlockESP tab", "Выбор по кейбинду блока для BlockESP в NEI, или по взгляду на блок. Добавляет вкладку @BlockESP");
     }
     
     @Override public Panel settingPanel() {
@@ -134,13 +139,13 @@ public class XRaySelect extends CheatModule {
         );
     }
     
-    class XRaySettings extends ColorPickerGui {
+    class BlockESPSettings extends ColorPickerGui {
         
         JCheckBox hidden, tracer;
         SelectedBlock block;
         JSlider s;
 
-        XRaySettings(SelectedBlock block) {
+        BlockESPSettings(SelectedBlock block) {
             super(block.itemBlock.getDisplayName(), block);
             this.block = block;
             s = new JSlider(0, 100);

@@ -73,12 +73,12 @@ public class VanilaNuker extends CheatModule {
                     return lang.get("By sight or around the player", "По взгляду или вокруг игрока");
                 }
             },
-            new Button("OnlyXRay", onlyXRay) {
+            new Button("OnlyBlockESP", onlyXRay) {
                 @Override public void onLeftClick() {
                     buttonValue(onlyXRay = !onlyXRay);
                 }
                 @Override public String elementDesc() {
-                    return lang.get("Digging in only XRay blocks", "Вскапывание только XRay блоков");
+                    return lang.get("Digging in only BlockESP blocks", "Вскапывание только BlockESP блоков");
                 }
             },
             new Button("HandShake", handshake) {

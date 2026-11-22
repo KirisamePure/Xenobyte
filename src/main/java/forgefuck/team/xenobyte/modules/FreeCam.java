@@ -8,6 +8,7 @@ import forgefuck.team.xenobyte.gui.click.elements.Button;
 import forgefuck.team.xenobyte.gui.click.elements.Panel;
 import forgefuck.team.xenobyte.gui.click.elements.ScrollSlider;
 import forgefuck.team.xenobyte.utils.Keys;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.settings.GameSettings;
@@ -16,6 +17,7 @@ import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraft.client.multiplayer.WorldClient;
 
 /**
@@ -127,6 +129,13 @@ public class FreeCam extends CheatModule {
         }
     }
 
+    /** Inside a block, vanilla covers the screen with that block's texture: skip it so the camera sees through terrain. */
+    @SubscribeEvent public void blockOverlay(RenderBlockOverlayEvent e) {
+        if (e.overlayType == RenderBlockOverlayEvent.OverlayType.BLOCK) {
+            e.setCanceled(true);
+        }
+    }
+    
     @Override public boolean doSendPacket(Packet packet) {
         return !(packet instanceof C03PacketPlayer || packet instanceof C0BPacketEntityAction);
     }

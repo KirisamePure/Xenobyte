@@ -3,20 +3,20 @@ package forgefuck.team.xenobyte.render;
 import org.lwjgl.opengl.GL11;
 
 import forgefuck.team.xenobyte.api.Xeno;
-import forgefuck.team.xenobyte.modules.XRaySelect;
-import forgefuck.team.xenobyte.modules.XRaySelect.SelectedBlock;
+import forgefuck.team.xenobyte.modules.BlockESPSelect;
+import forgefuck.team.xenobyte.modules.BlockESPSelect.SelectedBlock;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 
-public class XRayHintRender implements IItemRenderer {
+public class BlockESPHintRender implements IItemRenderer {
     
     private RenderItem itemRender;
-    private XRaySelect selector;
+    private BlockESPSelect selector;
     private SelectedBlock block;
     
-    public XRayHintRender(XRaySelect selector) {
+    public BlockESPHintRender(BlockESPSelect selector) {
         this.itemRender = new RenderItem();
         this.selector = selector;
     }

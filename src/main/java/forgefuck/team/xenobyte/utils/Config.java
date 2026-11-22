@@ -81,9 +81,10 @@ public class Config {
     }
     
     private void modulesSave() {
-        data.moduleData.clear();
+        // Entries of modules unknown to this build (other Xenobyte versions share this file) are kept.
+        moduleHandler.allModules().forEach(module -> data.moduleData.remove(module.configId()));
         moduleHandler.allModules().forEach(module -> {
-            String id = module.getName();
+            String id = module.configId();
             Class moduleClass = module.getClass();
             for (Class clazz : new Class[] { moduleClass, moduleClass.getSuperclass() }) {
                 for (Field field : clazz.getDeclaredFields()) {
@@ -113,7 +114,7 @@ public class Config {
     
     private void modulesLoad() {
         data.moduleData.forEach((ID, FLDS) -> {
-            CheatModule module = moduleHandler.getModuleByName(ID);
+            CheatModule module = moduleHandler.moduleGetter(m -> m.configId().equals(ID));
             if (module != null) {
                 FLDS.forEach((FLD, DATA) -> {
                     Class clazz = FLD.startsWith("super:") ? module.getClass().getSuperclass() : module.getClass();

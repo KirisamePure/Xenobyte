@@ -54,12 +54,12 @@ public class TurretNuker extends CheatModule {
                     return lang.get("By sight or around the player", "По взгляду или вокруг игрока");
                 }
             },
-            new Button("OnlyXRay", onlyXRay) {
+            new Button("OnlyBlockESP", onlyXRay) {
                 @Override public void onLeftClick() {
                     buttonValue(onlyXRay = !onlyXRay);
                 }
                 @Override public String elementDesc() {
-                    return lang.get("Breaking only XRay blocks", "Разрушение только XRay блоков");
+                    return lang.get("Breaking only BlockESP blocks", "Разрушение только BlockESP блоков");
                 }
             }
         );

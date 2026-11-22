@@ -54,12 +54,12 @@ public class CrayfishNuker extends CheatModule {
                     return lang.get("By sight or around the player", "По взгляду или вокруг игрока");
                 }
             },
-            new Button("OnlyXRay", onlyXRay) {
+            new Button("OnlyBlockESP", onlyXRay) {
                 @Override public void onLeftClick() {
                     buttonValue(onlyXRay = !onlyXRay);
                 }
                 @Override public String elementDesc() {
-                    return lang.get("Removing only XRay blocks", "Удаление только XRay блоков");
+                    return lang.get("Removing only BlockESP blocks", "Удаление только BlockESP блоков");
                 }
             }
         );

@@ -13,14 +13,14 @@ import forgefuck.team.xenobyte.api.gui.WidgetMessage;
 import forgefuck.team.xenobyte.api.gui.WidgetMode;
 import forgefuck.team.xenobyte.handlers.ModuleHandler;
 import forgefuck.team.xenobyte.modules.GiveSelect;
-import forgefuck.team.xenobyte.modules.XRaySelect;
+import forgefuck.team.xenobyte.modules.BlockESPSelect;
 
 public abstract class CheatModule extends ModuleAbility implements Xeno {
     
     private boolean forgeEvents, ticksStarted;
     @Cfg("cfgState") public boolean cfgState;
     private GiveSelect giveSelector;
-    private XRaySelect xraySelector;
+    private BlockESPSelect xraySelector;
     private final Category category;
     private final PerformMode mode;
     private ModuleHandler handler;
@@ -40,6 +40,15 @@ public abstract class CheatModule extends ModuleAbility implements Xeno {
     
     public String getName() {
         return name;
+    }
+    
+    /**
+     * Key of this module in the config file. Defaults to the module name; a renamed module returns its old
+     * name here, so keybinds and settings survive the rename and stay compatible with older builds that share
+     * the same config file.
+     */
+    public String configId() {
+        return getName();
     }
     
     public PerformMode getMode() {
@@ -89,7 +98,7 @@ public abstract class CheatModule extends ModuleAbility implements Xeno {
     public void handlerInit(ModuleHandler handler) {
         if (moduleHandler() == null) {
             this.handler = handler;
-            xraySelector = (XRaySelect) moduleHandler().getModuleByClass(XRaySelect.class);
+            xraySelector = (BlockESPSelect) moduleHandler().getModuleByClass(BlockESPSelect.class);
             giveSelector = (GiveSelect) moduleHandler().getModuleByClass(GiveSelect.class);
             onHandlerInit();
         }
@@ -127,7 +136,7 @@ public abstract class CheatModule extends ModuleAbility implements Xeno {
         return giveSelector;
     }
     
-    protected XRaySelect xraySelector() {
+    protected BlockESPSelect xraySelector() {
         return xraySelector;
     }
     

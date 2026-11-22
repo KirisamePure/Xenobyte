@@ -91,8 +91,9 @@ import forgefuck.team.xenobyte.modules.VeinScan;
 import forgefuck.team.xenobyte.modules.WallHack;
 import forgefuck.team.xenobyte.modules.WayLine;
 import forgefuck.team.xenobyte.modules.Widgets;
+import forgefuck.team.xenobyte.modules.BlockESP;
+import forgefuck.team.xenobyte.modules.BlockESPSelect;
 import forgefuck.team.xenobyte.modules.XRay;
-import forgefuck.team.xenobyte.modules.XRaySelect;
 import forgefuck.team.xenobyte.modules.XenAura;
 import forgefuck.team.xenobyte.modules.XenoFly;
 import forgefuck.team.xenobyte.modules.XenoGui;
@@ -150,7 +151,7 @@ public class ModulesList extends ArrayList<CheatModule>  {
         add(new OCShutDown());
         add(new ZtonesMeta());
         add(new GiveSelect());
-        add(new XRaySelect());
+        add(new BlockESPSelect());
         add(new FullBright());
         add(new AutoSprint());
         add(new TinkerGive());
@@ -193,6 +194,7 @@ public class ModulesList extends ArrayList<CheatModule>  {
         add(new Rocket());
         add(new NoWeb());
         add(new Step());
+        add(new BlockESP());
         add(new XRay());
         add(new Esp());
     }
