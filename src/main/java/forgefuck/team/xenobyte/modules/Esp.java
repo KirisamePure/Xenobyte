@@ -13,8 +13,11 @@ import forgefuck.team.xenobyte.api.render.IDraw;
 import forgefuck.team.xenobyte.gui.click.elements.Button;
 import forgefuck.team.xenobyte.gui.click.elements.Panel;
 import forgefuck.team.xenobyte.gui.click.elements.ScrollSlider;
+import forgefuck.team.xenobyte.render.EspBox2D;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 public class Esp extends CheatModule {
@@ -30,6 +33,11 @@ public class Esp extends CheatModule {
     @Cfg("lines") private boolean lines;
     @Cfg("radius") private int radius;
     @Cfg("drop") private boolean drop;
+    @Cfg("box2d") private boolean box2d;
+    @Cfg("box2dInfo") private boolean box2dInfo;
+    private final EspBox2D box = new EspBox2D();
+    private List<Entity> targets = new ArrayList<Entity>();
+    private List<Integer> targetColors = new ArrayList<Integer>();
     private List<IDraw> objects;
     private double lx, ly, lz;
     public boolean linesCheck;
@@ -41,12 +49,15 @@ public class Esp extends CheatModule {
         players = true;
         blocks = true;
         lines = true;
+        box2dInfo = true;
         radius = 100;
     }
     
     @Override public void onTick(boolean inGame) {
         if (inGame) {
             List<IDraw> out = new ArrayList<IDraw>();
+            List<Entity> outTargets = new ArrayList<Entity>();
+            List<Integer> outColors = new ArrayList<Integer>();
             utils.nearEntityes(radius)
             .forEach(e -> {
                 final float[] col = new float[3];
@@ -67,6 +78,8 @@ public class Esp extends CheatModule {
                 } else {
                     return;
                 }
+                outTargets.add(e);
+                outColors.add(((int) (col[0] * 255) << 16) | ((int) (col[1] * 255) << 8) | (int) (col[2] * 255));
                 out.add(() -> {
                     lx = bindLines ? RenderManager.instance.viewerPosX : lx;
                     ly = bindLines ? RenderManager.instance.viewerPosY : ly;
@@ -81,11 +94,16 @@ public class Esp extends CheatModule {
                 });
             });
             objects = out;
+            targets = outTargets;
+            targetColors = outColors;
         }
     }
     
     @Override public void onDisabled() {
         objects.clear();
+        targets = new ArrayList<Entity>();
+        targetColors = new ArrayList<Integer>();
+        box.clear();
     }
     
     @SubscribeEvent public void worldRender(RenderWorldLastEvent e) {
@@ -93,6 +111,20 @@ public class Esp extends CheatModule {
         while (iterator.hasNext()) {
             iterator.next().draw();
         }
+        if (box2d) {
+            box.project(targets, targetColors, e.partialTicks);
+        }
+    }
+    
+    @SubscribeEvent public void hudRender(RenderGameOverlayEvent.Post e) {
+        if (box2d && e.type == RenderGameOverlayEvent.ElementType.ALL) {
+            box.draw(e.resolution.getScaleFactor(), box2dInfo);
+        }
+    }
+    
+    /** Boxes projected in the last frame, exposed for tests. */
+    public List<EspBox2D.Box> box2dBoxes() {
+        return box.boxes();
     }
     
     @Override public String moduleDesc() {
@@ -107,6 +139,23 @@ public class Esp extends CheatModule {
                 }
                 @Override public String elementDesc() {
                     return lang.get("Rendering a block", "Отрисовка блока");
+                }
+            },
+            new Button("Box2D", box2d) {
+                @Override public void onLeftClick() {
+                    buttonValue(box2d = !box2d);
+                    box.clear();
+                }
+                @Override public String elementDesc() {
+                    return lang.get("2D box around entities (like LiquidBounce)", "2D рамка вокруг сущностей (как в LiquidBounce)");
+                }
+            },
+            new Button("Box2DInfo", box2dInfo) {
+                @Override public void onLeftClick() {
+                    buttonValue(box2dInfo = !box2dInfo);
+                }
+                @Override public String elementDesc() {
+                    return lang.get("Health bar, armor, held item and name around the 2D box", "Полоса здоровья, броня, предмет в руке и имя вокруг 2D рамки");
                 }
             },
             new Button("TracerLine", lines) {
