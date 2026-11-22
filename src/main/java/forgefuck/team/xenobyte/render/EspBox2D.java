@@ -132,7 +132,7 @@ public class EspBox2D {
                 EntityLivingBase living = (EntityLivingBase) b.entity;
                 drawHealth(font, living, l, t, bt);
                 drawArmor(mc, font, living, r, t, bt);
-                drawHeld(mc, font, living, l, r, bt);
+                drawHeld(mc, font, living, l, r, t, bt);
             }
             drawName(font, b.entity, l, r, t);
         }
@@ -156,22 +156,44 @@ public class EspBox2D {
         }
     }
 
+    /** Smallest readable icon size; below it armor and held item are not drawn (box too far away). */
+    public static final double MIN_ICON = 3;
+    /** Largest icon size, so a box right in front of the camera doesn't get giant icons. */
+    public static final double MAX_ICON = 24;
+
+    /**
+     * Armor layout along the right edge of a box of height {@code h} (GUI units): the box is split into 4 slots,
+     * helmet at the top to boots at the bottom, each icon centred in its slot. Returns {slot height, icon size};
+     * icon size 0 means too small to draw.
+     */
+    public static double[] armorLayout(double h) {
+        double slot = h / 4;
+        double icon = Math.min(MAX_ICON, slot * 0.9);
+        return new double[] { slot, icon < MIN_ICON ? 0 : icon };
+    }
+
+    /** Held-item icon size for a box of the given height (same scale as one armor slot). */
+    public static double heldSize(double h) {
+        double icon = Math.min(MAX_ICON, h / 4 * 0.9);
+        return icon < MIN_ICON ? 0 : icon;
+    }
+
     private void drawArmor(Minecraft mc, FontRenderer font, EntityLivingBase e, double r, double t, double b) {
-        double y = t;
-        double step = Math.max(6, Math.min(8.5, (b - t) / 4));
-        for (int slot = 4; slot >= 1; slot--) { // helmet .. boots
-            ItemStack stack = e.getEquipmentInSlot(slot);
+        double[] layout = armorLayout(b - t);
+        double slot = layout[0], icon = layout[1];
+        if (icon == 0) return;
+        for (int i = 0; i < 4; i++) { // equipment slot 4 = helmet .. 1 = boots
+            ItemStack stack = e.getEquipmentInSlot(4 - i);
             if (stack != null) {
-                item(mc, font, stack, r + 2, y, step / 16);
+                item(mc, font, stack, r + 1.5, t + i * slot + (slot - icon) / 2, icon / 16);
             }
-            y += step;
         }
     }
 
-    private void drawHeld(Minecraft mc, FontRenderer font, EntityLivingBase e, double l, double r, double b) {
+    private void drawHeld(Minecraft mc, FontRenderer font, EntityLivingBase e, double l, double r, double t, double b) {
         ItemStack held = e.getHeldItem();
-        if (held == null) return;
-        double size = 8;
+        double size = heldSize(b - t);
+        if (held == null || size == 0) return;
         double cx = (l + r) / 2;
         item(mc, font, held, cx - size / 2, b + 1.5, size / 16);
         String name = held.getDisplayName();
